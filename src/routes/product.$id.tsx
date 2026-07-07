@@ -5,7 +5,7 @@ import {
   Heart, GitCompare, ShoppingBag, Star, Truck, RotateCcw, ShieldCheck,
   ChevronLeft, ChevronRight, Sparkles, Check,
 } from "lucide-react";
-import { getProduct, discount, similarProducts, frequentlyBought, PRODUCTS } from "@/lib/products";
+import { getProduct, discount, similarProducts, frequentlyBought, PRODUCTS, type Product } from "@/lib/products";
 import { inr, daysFromNow } from "@/lib/format";
 import { useShop } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
@@ -45,7 +45,7 @@ export const Route = createFileRoute("/product/$id")({
 });
 
 function ProductPage() {
-  const p = Route.useLoaderData();
+  const p = Route.useLoaderData() as Product;
   const navigate = useNavigate();
   const [imgIdx, setImgIdx] = useState(0);
   const [color, setColor] = useState<string | undefined>(p.colors?.[0]);
@@ -131,7 +131,7 @@ function ProductPage() {
             )}
           </motion.div>
           <div className="grid grid-cols-4 gap-3">
-            {p.gallery.map((src, i) => (
+            {p.gallery.map((src: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setImgIdx(i)}
@@ -173,7 +173,7 @@ function ProductPage() {
           <p className="text-muted-foreground leading-relaxed">{p.description}</p>
 
           <ul className="grid grid-cols-2 gap-2 text-sm">
-            {p.highlights.map((h) => (
+            {p.highlights.map((h: string) => (
               <li key={h} className="flex items-start gap-2">
                 <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {h}
               </li>
@@ -184,7 +184,7 @@ function ProductPage() {
             <div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Color · <span className="text-foreground normal-case">{color}</span></div>
               <div className="flex gap-2">
-                {p.colors.map((c) => (
+                {p.colors.map((c: string) => (
                   <button
                     key={c} onClick={() => setColor(c)}
                     className={`px-4 h-10 rounded-full text-sm border transition ${
@@ -200,7 +200,7 @@ function ProductPage() {
             <div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Size · <span className="text-foreground normal-case">{size}</span></div>
               <div className="flex flex-wrap gap-2">
-                {p.sizes.map((s) => (
+                {p.sizes.map((s: string) => (
                   <button
                     key={s} onClick={() => setSize(s)}
                     className={`min-w-[3.5rem] h-10 px-3 rounded-lg text-sm border transition ${
@@ -307,7 +307,7 @@ function ProductPage() {
         <div className="rounded-2xl border border-border p-6">
           <h3 className="font-display text-xl mb-4">Specifications</h3>
           <dl className="space-y-2 text-sm">
-            {Object.entries(p.specs).map(([k, v]) => (
+            {Object.entries(p.specs as Record<string, string>).map(([k, v]) => (
               <div key={k} className="flex justify-between border-b border-border/60 py-2">
                 <dt className="text-muted-foreground">{k}</dt>
                 <dd className="text-foreground font-medium">{v}</dd>
@@ -318,7 +318,7 @@ function ProductPage() {
         <div className="rounded-2xl border border-border p-6">
           <h3 className="font-display text-xl mb-4">Tags & occasions</h3>
           <div className="flex flex-wrap gap-2">
-            {p.tags.map((t) => (
+            {p.tags.map((t: string) => (
               <span key={t} className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs">#{t}</span>
             ))}
           </div>
