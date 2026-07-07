@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
@@ -24,6 +25,11 @@ const WishlistRoute = WishlistRouteImport.update({
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -50,6 +56,7 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
+  '/compare': typeof CompareRoute
   '/shop': typeof ShopRoute
   '/wishlist': typeof WishlistRoute
   '/api/chat': typeof ApiChatRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
+  '/compare': typeof CompareRoute
   '/shop': typeof ShopRoute
   '/wishlist': typeof WishlistRoute
   '/api/chat': typeof ApiChatRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
+  '/compare': typeof CompareRoute
   '/shop': typeof ShopRoute
   '/wishlist': typeof WishlistRoute
   '/api/chat': typeof ApiChatRoute
@@ -77,16 +86,25 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cart'
+    | '/compare'
     | '/shop'
     | '/wishlist'
     | '/api/chat'
     | '/product/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cart' | '/shop' | '/wishlist' | '/api/chat' | '/product/$id'
+  to:
+    | '/'
+    | '/cart'
+    | '/compare'
+    | '/shop'
+    | '/wishlist'
+    | '/api/chat'
+    | '/product/$id'
   id:
     | '__root__'
     | '/'
     | '/cart'
+    | '/compare'
     | '/shop'
     | '/wishlist'
     | '/api/chat'
@@ -96,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CartRoute: typeof CartRoute
+  CompareRoute: typeof CompareRoute
   ShopRoute: typeof ShopRoute
   WishlistRoute: typeof WishlistRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -152,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CartRoute: CartRoute,
+  CompareRoute: CompareRoute,
   ShopRoute: ShopRoute,
   WishlistRoute: WishlistRoute,
   ApiChatRoute: ApiChatRoute,
