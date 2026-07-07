@@ -7,10 +7,14 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { AIAssistant } from "@/components/AIAssistant";
+import { Sparkles } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -77,16 +81,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Lumen — AI-curated boutique commerce" },
+      { name: "description", content: "A curated boutique of premium products, matched to you by an AI concierge. Free 30-day returns across India." },
+      { name: "author", content: "Lumen" },
+      { property: "og:title", content: "Lumen — AI-curated boutique commerce" },
+      { property: "og:description", content: "A curated boutique of premium products, matched to you by an AI concierge." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" },
       {
         rel: "stylesheet",
         href: appCss,
@@ -116,11 +122,25 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [aiOpen, setAiOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="min-h-screen flex flex-col">
+        <Header onOpenAI={() => setAiOpen(true)} />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+        <button
+          onClick={() => setAiOpen(true)}
+          className="fixed bottom-6 right-6 z-30 sm:hidden h-14 w-14 rounded-full bg-gradient-warm text-primary-foreground grid place-items-center shadow-glow"
+          aria-label="Ask Lumen"
+        >
+          <Sparkles className="h-6 w-6" />
+        </button>
+        <AIAssistant open={aiOpen} onClose={() => setAiOpen(false)} />
+      </div>
     </QueryClientProvider>
   );
 }
