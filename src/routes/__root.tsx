@@ -15,6 +15,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIAssistant } from "@/components/AIAssistant";
 import { Sparkles } from "lucide-react";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -140,6 +141,7 @@ function RootComponent() {
           <Sparkles className="h-6 w-6" />
         </button>
         <AIAssistant open={aiOpen} onClose={() => setAiOpen(false)} />
+        <Toaster position="top-center" theme="dark" richColors closeButton />
       </div>
     </QueryClientProvider>
   );
