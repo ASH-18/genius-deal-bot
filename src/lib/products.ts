@@ -1,5 +1,26 @@
 export type Category = "Electronics" | "Fashion" | "Home" | "Beauty" | "Sports" | "Books";
 
+import imgSonic from "@/assets/products/sonic-pro-x.jpg";
+import imgMac from "@/assets/products/macbook-air-15.jpg";
+import imgVega from "@/assets/products/iphone-vega.jpg";
+import imgNova from "@/assets/products/galaxy-nova.jpg";
+import imgWatch from "@/assets/products/watch-atlas.jpg";
+import imgScarf from "@/assets/products/cashmere-scarf.jpg";
+import imgSneaker from "@/assets/products/sneaker-run.jpg";
+import imgLoafer from "@/assets/products/loafer-oslo.jpg";
+import imgChair from "@/assets/products/chair-arne.jpg";
+import imgLamp from "@/assets/products/lamp-nara.jpg";
+import imgVase from "@/assets/products/vase-terra.jpg";
+import imgCandle from "@/assets/products/candle-oud.jpg";
+import imgSerum from "@/assets/products/serum-glow.jpg";
+import imgPerfume from "@/assets/products/perfume-noir.jpg";
+import imgYoga from "@/assets/products/yoga-mat.jpg";
+import imgBook from "@/assets/products/book-atlas.jpg";
+import imgKettle from "@/assets/products/kettle-copper.jpg";
+import imgBackpack from "@/assets/products/backpack-drift.jpg";
+import imgKindle from "@/assets/products/kindle-air.jpg";
+import imgSpeaker from "@/assets/products/speaker-pebble.jpg";
+
 export interface Product {
   id: string;
   name: string;
@@ -25,9 +46,7 @@ export interface Product {
   flashDeal?: boolean;
 }
 
-/** Curated catalog. Images are direct Unsplash CDN URLs (stable). */
-const u = (id: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`;
+/** Curated catalog. Images are locally generated product renders. */
 
 export const PRODUCTS: Product[] = [
   {
@@ -40,8 +59,8 @@ export const PRODUCTS: Product[] = [
     mrp: 19999,
     rating: 4.6,
     reviews: 2841,
-    image: u("photo-1583394838336-acd977736f90"),
-    gallery: [u("photo-1583394838336-acd977736f90"), u("photo-1590658268037-6bf12165a8df"), u("photo-1546435770-a3e426bf472b")],
+    image: imgSonic,
+    gallery: [imgSonic],
     colors: ["Obsidian", "Ivory", "Copper"],
     tags: ["noise-cancelling", "over-ear", "premium", "bluetooth-5.3"],
     description: "Studio-grade sound with adaptive noise cancellation and 40-hour battery life.",
@@ -55,8 +74,8 @@ export const PRODUCTS: Product[] = [
     brand: "Kōan",
     category: "Electronics", subcategory: "Laptops",
     price: 129900, mrp: 149900, rating: 4.8, reviews: 1203,
-    image: u("photo-1517336714731-489689fd1ca8"),
-    gallery: [u("photo-1517336714731-489689fd1ca8"), u("photo-1496181133206-80ce9b88a853"), u("photo-1541807084-5c52b6b3adef")],
+    image: imgMac,
+    gallery: [imgMac],
     colors: ["Midnight", "Starlight"],
     tags: ["laptop", "programming", "creator", "18h-battery"],
     description: "A featherlight 15\" ultrabook engineered for developers, designers, and long flights.",
@@ -70,8 +89,8 @@ export const PRODUCTS: Product[] = [
     brand: "Kōan",
     category: "Electronics", subcategory: "Smartphones",
     price: 89900, mrp: 99900, rating: 4.7, reviews: 5412,
-    image: u("photo-1592750475338-74b7b21085ab"),
-    gallery: [u("photo-1592750475338-74b7b21085ab"), u("photo-1511707171634-5f897ff02aa9"), u("photo-1510557880182-3d4d3cba35a5")],
+    image: imgVega,
+    gallery: [imgVega],
     colors: ["Titanium", "Obsidian", "Copper"],
     tags: ["smartphone", "camera", "premium"],
     description: "Titanium body, triple-lens computational camera, and all-day intelligence.",
@@ -85,8 +104,8 @@ export const PRODUCTS: Product[] = [
     brand: "Helio",
     category: "Electronics", subcategory: "Smartphones",
     price: 84999, mrp: 109999, rating: 4.5, reviews: 3891,
-    image: u("photo-1610945415295-d9bbf067e59c"),
-    gallery: [u("photo-1610945415295-d9bbf067e59c"), u("photo-1580910051074-3eb694886505"), u("photo-1567581935884-3349723552ca")],
+    image: imgNova,
+    gallery: [imgNova],
     colors: ["Phantom", "Cream", "Violet"],
     tags: ["smartphone", "android", "s-pen"],
     description: "200MP camera, S-Pen support, and a 6.8\" adaptive Dynamic AMOLED display.",
@@ -100,8 +119,8 @@ export const PRODUCTS: Product[] = [
     brand: "Meridian",
     category: "Fashion", subcategory: "Watches",
     price: 8499, mrp: 12999, rating: 4.4, reviews: 621,
-    image: u("photo-1524592094714-0f0654e20314"),
-    gallery: [u("photo-1524592094714-0f0654e20314"), u("photo-1523170335258-f5ed11844a49"), u("photo-1547996160-81dfa63595aa")],
+    image: imgWatch,
+    gallery: [imgWatch],
     colors: ["Cognac", "Onyx"],
     tags: ["watch", "leather", "gift"],
     description: "A hand-finished chronograph with Italian leather strap and sapphire crystal.",
@@ -115,8 +134,8 @@ export const PRODUCTS: Product[] = [
     brand: "Hima",
     category: "Fashion", subcategory: "Accessories",
     price: 3499, mrp: 5999, rating: 4.7, reviews: 1204,
-    image: u("photo-1520903920243-00d872a2d1c9"),
-    gallery: [u("photo-1520903920243-00d872a2d1c9"), u("photo-1601925260368-ae2f83cf8b7f"), u("photo-1580537782894-c1a2c1d1f9d1")],
+    image: imgScarf,
+    gallery: [imgScarf],
     colors: ["Amber", "Charcoal", "Ivory"],
     tags: ["cashmere", "gift", "winter"],
     description: "100% Mongolian cashmere, hand-loomed in Kathmandu. Impossibly soft.",
@@ -130,8 +149,8 @@ export const PRODUCTS: Product[] = [
     brand: "Kite",
     category: "Sports", subcategory: "Footwear",
     price: 2799, mrp: 4499, rating: 4.3, reviews: 3391,
-    image: u("photo-1542291026-7eec264c27ff"),
-    gallery: [u("photo-1542291026-7eec264c27ff"), u("photo-1600185365483-26d7a4cc7519"), u("photo-1595950653106-6c9ebd614d3a")],
+    image: imgSneaker,
+    gallery: [imgSneaker],
     sizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
     colors: ["Coral", "Midnight", "Sand"],
     tags: ["running", "sneakers", "under-3000"],
@@ -146,8 +165,8 @@ export const PRODUCTS: Product[] = [
     brand: "Nord",
     category: "Fashion", subcategory: "Footwear",
     price: 4499, mrp: 6999, rating: 4.5, reviews: 812,
-    image: u("photo-1533867617858-e7b97e060509"),
-    gallery: [u("photo-1533867617858-e7b97e060509"), u("photo-1614252369475-531eba835eb1"), u("photo-1449505278894-297fdb3edbc1")],
+    image: imgLoafer,
+    gallery: [imgLoafer],
     sizes: ["UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
     colors: ["Camel", "Espresso"],
     tags: ["loafers", "formal", "leather"],
@@ -162,8 +181,8 @@ export const PRODUCTS: Product[] = [
     brand: "Studio Fjord",
     category: "Home", subcategory: "Furniture",
     price: 34999, mrp: 49999, rating: 4.8, reviews: 214,
-    image: u("photo-1519947486511-46149fa0a254"),
-    gallery: [u("photo-1519947486511-46149fa0a254"), u("photo-1567538096630-e0c55bd6374c"), u("photo-1555041469-a586c61ea9bc")],
+    image: imgChair,
+    gallery: [imgChair],
     colors: ["Bouclé Ivory", "Camel Leather"],
     tags: ["lounge", "living-room", "premium"],
     description: "A sculptural lounge chair with hand-turned oak frame and bouclé upholstery.",
@@ -177,8 +196,8 @@ export const PRODUCTS: Product[] = [
     brand: "Studio Fjord",
     category: "Home", subcategory: "Lighting",
     price: 6499, mrp: 8999, rating: 4.6, reviews: 342,
-    image: u("photo-1513506003901-1e6a229e2d15"),
-    gallery: [u("photo-1513506003901-1e6a229e2d15"), u("photo-1524578271613-d550eacf6090"), u("photo-1567016432779-094069958ea5")],
+    image: imgLamp,
+    gallery: [imgLamp],
     tags: ["lighting", "living-room", "gift"],
     description: "Handmade Japanese washi paper diffuses light into a soft warm glow.",
     highlights: ["Handmade washi", "Warm 2700K", "Dimmable"],
@@ -191,8 +210,8 @@ export const PRODUCTS: Product[] = [
     brand: "Ando",
     category: "Home", subcategory: "Decor",
     price: 1999, mrp: 2999, rating: 4.5, reviews: 156,
-    image: u("photo-1578500494198-246f612d3b3d"),
-    gallery: [u("photo-1578500494198-246f612d3b3d"), u("photo-1493663284031-b7e3aefcae8e"), u("photo-1616486338812-3dadae4b4ace")],
+    image: imgVase,
+    gallery: [imgVase],
     tags: ["decor", "ceramic", "gift"],
     description: "Wheel-thrown stoneware vase with a soft matte glaze.",
     highlights: ["Wheel-thrown", "Food-safe glaze"],
@@ -205,8 +224,8 @@ export const PRODUCTS: Product[] = [
     brand: "Maison Ilm",
     category: "Home", subcategory: "Fragrance",
     price: 1499, mrp: 2200, rating: 4.7, reviews: 943,
-    image: u("photo-1602874801007-aa27a288a86a"),
-    gallery: [u("photo-1602874801007-aa27a288a86a"), u("photo-1608181831718-c9ffd8728e5f"), u("photo-1611409408119-e2ee7f6dbafd")],
+    image: imgCandle,
+    gallery: [imgCandle],
     tags: ["candle", "gift", "under-2000", "eco"],
     description: "Hand-poured coconut wax candle with notes of oud, amber, and smoked cedar.",
     highlights: ["Coconut wax", "50h burn time", "Cotton wick"],
@@ -219,8 +238,8 @@ export const PRODUCTS: Product[] = [
     brand: "Kori",
     category: "Beauty", subcategory: "Skincare",
     price: 1299, mrp: 1899, rating: 4.6, reviews: 4180,
-    image: u("photo-1620916566398-39f1143ab7be"),
-    gallery: [u("photo-1620916566398-39f1143ab7be"), u("photo-1556228720-195a672e8a03"), u("photo-1571781926291-c477ebfd024b")],
+    image: imgSerum,
+    gallery: [imgSerum],
     tags: ["skincare", "vitamin-c", "eco"],
     description: "A stabilised 15% vitamin C serum with ferulic acid. Brightens in 4 weeks.",
     highlights: ["15% Vitamin C", "Ferulic acid", "Fragrance-free"],
@@ -233,8 +252,8 @@ export const PRODUCTS: Product[] = [
     brand: "Maison Ilm",
     category: "Beauty", subcategory: "Fragrance",
     price: 4899, mrp: 6499, rating: 4.7, reviews: 611,
-    image: u("photo-1541643600914-78b084683601"),
-    gallery: [u("photo-1541643600914-78b084683601"), u("photo-1592945403244-b3fbafd7f539"), u("photo-1594035910387-fea47794261f")],
+    image: imgPerfume,
+    gallery: [imgPerfume],
     tags: ["perfume", "gift", "unisex"],
     description: "Smoky vetiver, black pepper, and warm leather. A signature evening scent.",
     highlights: ["50ml EDP", "8h wear", "Unisex"],
@@ -247,8 +266,8 @@ export const PRODUCTS: Product[] = [
     brand: "Prana",
     category: "Sports", subcategory: "Yoga",
     price: 2499, mrp: 3999, rating: 4.6, reviews: 1520,
-    image: u("photo-1592432678016-e910b452f9a2"),
-    gallery: [u("photo-1592432678016-e910b452f9a2"), u("photo-1518611012118-696072aa579a"), u("photo-1601925260368-ae2f83cf8b7f")],
+    image: imgYoga,
+    gallery: [imgYoga],
     tags: ["yoga", "eco", "sport"],
     description: "Natural cork on a recycled-rubber base. Grippier when wet.",
     highlights: ["Natural cork", "Recycled rubber", "5mm cushioning"],
@@ -261,8 +280,8 @@ export const PRODUCTS: Product[] = [
     brand: "Editions Kite",
     category: "Books", subcategory: "Non-fiction",
     price: 999, mrp: 1499, rating: 4.8, reviews: 233,
-    image: u("photo-1512820790803-83ca734da794"),
-    gallery: [u("photo-1512820790803-83ca734da794"), u("photo-1524578271613-d550eacf6090"), u("photo-1519681393784-d120267933ba")],
+    image: imgBook,
+    gallery: [imgBook],
     tags: ["book", "gift", "under-2000"],
     description: "A photographic atlas of 34 small cities you've never heard of.",
     highlights: ["Hardcover", "288 pages", "Signed edition"],
@@ -275,8 +294,8 @@ export const PRODUCTS: Product[] = [
     brand: "Ando",
     category: "Home", subcategory: "Kitchen",
     price: 3299, mrp: 4499, rating: 4.5, reviews: 401,
-    image: u("photo-1517701550927-30cf4ba1dba5"),
-    gallery: [u("photo-1517701550927-30cf4ba1dba5"), u("photo-1544787219-7f47ccb76574"), u("photo-1495474472287-4d71bcdd2085")],
+    image: imgKettle,
+    gallery: [imgKettle],
     tags: ["kitchen", "coffee", "gift"],
     description: "A slender goose-neck kettle for precise pour-over technique.",
     highlights: ["Goose-neck", "Copper body", "1L capacity"],
@@ -289,8 +308,8 @@ export const PRODUCTS: Product[] = [
     brand: "Kite",
     category: "Fashion", subcategory: "Bags",
     price: 3799, mrp: 5499, rating: 4.6, reviews: 1811,
-    image: u("photo-1553062407-98eeb64c6a62"),
-    gallery: [u("photo-1553062407-98eeb64c6a62"), u("photo-1548036328-c9fa89d128fa"), u("photo-1622560481158-95c1bd6c5eb2")],
+    image: imgBackpack,
+    gallery: [imgBackpack],
     colors: ["Olive", "Black", "Sand"],
     tags: ["backpack", "travel", "laptop-15"],
     description: "Weather-resistant recycled ripstop, laptop sleeve, and lay-flat opening.",
@@ -304,8 +323,8 @@ export const PRODUCTS: Product[] = [
     brand: "Aureal",
     category: "Electronics", subcategory: "Reading",
     price: 14999, mrp: 17999, rating: 4.7, reviews: 902,
-    image: u("photo-1592434134753-a70baf7979d5"),
-    gallery: [u("photo-1592434134753-a70baf7979d5"), u("photo-1512820790803-83ca734da794"), u("photo-1519682337058-a94d519337bc")],
+    image: imgKindle,
+    gallery: [imgKindle],
     tags: ["ereader", "reading", "gift"],
     description: "300 ppi glare-free display, warm light, and 10-week battery.",
     highlights: ["300 ppi", "Warm light", "Waterproof IPX8"],
@@ -318,8 +337,8 @@ export const PRODUCTS: Product[] = [
     brand: "Aureal",
     category: "Electronics", subcategory: "Audio",
     price: 4999, mrp: 6999, rating: 4.4, reviews: 2210,
-    image: u("photo-1608043152269-423dbba4e7e1"),
-    gallery: [u("photo-1608043152269-423dbba4e7e1"), u("photo-1545454675-3531b543be5d"), u("photo-1558379852-f0e9e5e6f39d")],
+    image: imgSpeaker,
+    gallery: [imgSpeaker],
     colors: ["Sand", "Slate"],
     tags: ["speaker", "portable", "under-5000"],
     description: "360° room-filling sound in a pocketable form. IP67 dust and waterproof.",
