@@ -151,7 +151,7 @@ function Section({ title, subtitle, accent, children }: { title: string; subtitl
         </Link>
       </div>
       {children}
-    </div>
+    </section>
   );
 }
 
