@@ -14,7 +14,7 @@ export const Route = createFileRoute("/cart")({
 const COUPONS: Record<string, number> = { LUMEN10: 0.10, WINTER15: 0.15, FIRST20: 0.20 };
 
 function CartPage() {
-  const { cart, setQty, removeFromCart, clearCart } = useShop();
+  const { cart, setQty, removeFromCart, clearCart, aiCoupons } = useShop();
   const [coupon, setCoupon] = useState("");
   const [discountPct, setDiscountPct] = useState(0);
 
@@ -30,9 +30,10 @@ function CartPage() {
 
   const applyCoupon = () => {
     const c = coupon.trim().toUpperCase();
-    if (COUPONS[c]) {
-      setDiscountPct(COUPONS[c]);
-      toast.success(`${c} applied · ${Math.round(COUPONS[c] * 100)}% off`);
+    const pct = COUPONS[c] ?? aiCoupons[c];
+    if (pct) {
+      setDiscountPct(pct);
+      toast.success(`${c} applied · ${Math.round(pct * 100)}% off`);
     } else if (c) toast.error("Invalid coupon");
   };
 

@@ -1,7 +1,7 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { PRODUCTS } from "@/lib/products";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { z } from "zod";
 
 // Hard caps to prevent token/cost abuse via oversized payloads.
@@ -53,6 +53,29 @@ function catalogContext() {
   ).join("\n");
 }
 
+// Deterministic negotiation policy. The model proposes; the server decides.
+// Caps prevent margin abuse regardless of how the user pushes back.
+function maxDiscountPct(productId: string): number {
+  const p = PRODUCTS.find((x) => x.id === productId);
+  if (!p) return 0;
+  const alreadyOffPct = (p.mrp - p.price) / p.mrp; // existing MRP discount
+  // Base cap 5%, +5% for high stock, +5% if item isn't a bestseller, capped at 15%.
+  let cap = 0.05;
+  if (p.stock > 40) cap += 0.05;
+  if (!p.bestseller) cap += 0.05;
+  // Squeeze cap if MRP discount is already generous.
+  if (alreadyOffPct > 0.25) cap = Math.min(cap, 0.07);
+  if (alreadyOffPct > 0.4) cap = Math.min(cap, 0.03);
+  return Math.round(Math.max(0, Math.min(0.15, cap)) * 100) / 100;
+}
+
+function makeCouponCode(productId: string): string {
+  const seed = `${productId}-${Date.now().toString(36)}`;
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return `LUMEN-${h.toString(36).slice(0, 6).toUpperCase()}`;
+}
+
 const SYSTEM = `You are Lumen, a warm, expert AI shopping concierge for a premium Indian e-commerce boutique.
 
 You help customers discover products, compare options, plan gifts, stay within a budget, and answer FAQs.
@@ -66,6 +89,14 @@ RULES
 - For comparisons, present a compact table of key differences and end with a clear pick.
 - For gifts, ask about the recipient (age, interests) if unknown; otherwise recommend 2–3 tasteful options.
 - For FAQs (returns, delivery, warranty, EMI): answer directly.
+
+PRICE NEGOTIATION
+- Customers may ask for a discount ("can you do better?", "any deal?", "match this price"). Engage warmly — never refuse outright.
+- Negotiate ONE product at a time. Ask which product if unclear.
+- Start with a modest counter-offer (typically 3–5%). Only sweeten it if the customer pushes with a reason (bundle, first-time buyer, price match, close to budget).
+- To lock in a deal, CALL the "negotiate" tool with the productId and the requested discount percent (integer 1–15). The tool returns the APPROVED percent and a coupon code — always honor that number, never promise more.
+- After the tool responds, present the coupon in a short line: **CODE · X% off · applies at cart**. Do not invent codes yourself.
+- If the approved discount is 0, politely explain the item is already at its best price and suggest a bundle or a similar item with more room.
 
 CATALOG
 ${catalogContext()}
@@ -112,6 +143,44 @@ export const Route = createFileRoute("/api/chat")({
           model: gateway("google/gemini-3-flash-preview"),
           system: SYSTEM,
           messages: await convertToModelMessages(trimmed as unknown as UIMessage[]),
+          stopWhen: stepCountIs(50),
+          tools: {
+            negotiate: tool({
+              description:
+                "Request an approved discount coupon for a single product. Server enforces the maximum discount policy — the returned percent may be lower than requested.",
+              inputSchema: z.object({
+                productId: z.string().describe("Exact product id from the catalog"),
+                requestedPct: z.number().int().describe("Discount percent the customer is asking for (1–15)"),
+              }),
+              execute: async ({ productId, requestedPct }) => {
+                const product = PRODUCTS.find((p) => p.id === productId);
+                if (!product) return { ok: false as const, reason: "unknown_product" };
+                const cap = maxDiscountPct(productId);
+                const approvedPct = Math.max(0, Math.min(Math.round(requestedPct), Math.round(cap * 100)));
+                if (approvedPct === 0) {
+                  return {
+                    ok: true as const,
+                    productId,
+                    productName: product.name,
+                    approvedPct: 0,
+                    code: null,
+                    finalPrice: product.price,
+                    reason: "at_best_price",
+                  };
+                }
+                const code = makeCouponCode(productId);
+                const finalPrice = Math.round(product.price * (1 - approvedPct / 100));
+                return {
+                  ok: true as const,
+                  productId,
+                  productName: product.name,
+                  approvedPct,
+                  code,
+                  finalPrice,
+                };
+              },
+            }),
+          },
         });
 
         return result.toUIMessageStreamResponse({

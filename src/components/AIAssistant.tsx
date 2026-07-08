@@ -1,15 +1,18 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { AnimatePresence, motion } from "framer-motion";
-import { Send, Sparkles, X, Loader2 } from "lucide-react";
+import { Send, Sparkles, X, Loader2, BadgePercent, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useShop } from "@/lib/store";
+import { toast } from "sonner";
+import { inr } from "@/lib/format";
 
 const SUGGESTIONS = [
   "I need shoes under ₹3000",
   "Recommend a laptop for programming",
   "Birthday gift for my sister under ₹4000",
-  "Compare Vega Pro vs Nova Ultra",
+  "Can you give me a better price on the Sonic Pro X?",
   "Find eco-friendly home decor",
 ];
 
@@ -17,10 +20,28 @@ export function AIAssistant({ open, onClose }: { open: boolean; onClose: () => v
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const addAiCoupon = useShop((s) => s.addAiCoupon);
+  const registeredRef = useRef<Set<string>>(new Set());
 
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
+
+  // Auto-register any AI-issued coupon so the cart can apply it.
+  useEffect(() => {
+    for (const m of messages) {
+      for (const p of m.parts as Array<Record<string, unknown>>) {
+        const type = p.type as string | undefined;
+        if (type && type.startsWith("tool-negotiate") && (p as { state?: string }).state === "output-available") {
+          const out = (p as { output?: { ok?: boolean; code?: string | null; approvedPct?: number } }).output;
+          if (out?.ok && out.code && out.approvedPct && !registeredRef.current.has(out.code)) {
+            registeredRef.current.add(out.code);
+            addAiCoupon(out.code, out.approvedPct / 100);
+          }
+        }
+      }
+    }
+  }, [messages, addAiCoupon]);
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -91,7 +112,24 @@ export function AIAssistant({ open, onClose }: { open: boolean; onClose: () => v
 
               {messages.map((m: UIMessage) => (
                 <Bubble key={m.id} role={m.role}>
-                  {m.parts.map((p, i) => (p.type === "text" ? <span key={i}>{p.text}</span> : null))}
+                  {m.parts.map((p, i) => {
+                    if (p.type === "text") return <span key={i}>{p.text}</span>;
+                    const type = (p as { type: string }).type;
+                    if (type.startsWith("tool-negotiate")) {
+                      const state = (p as { state?: string }).state;
+                      if (state !== "output-available") {
+                        return (
+                          <span key={i} className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="h-3 w-3 animate-spin" /> Checking best price…
+                          </span>
+                        );
+                      }
+                      const out = (p as { output?: { ok?: boolean; code?: string | null; approvedPct?: number; productName?: string; finalPrice?: number } }).output;
+                      if (!out?.ok) return null;
+                      return <DealCard key={i} code={out.code ?? null} pct={out.approvedPct ?? 0} name={out.productName ?? ""} finalPrice={out.finalPrice ?? 0} />;
+                    }
+                    return null;
+                  })}
                 </Bubble>
               ))}
 
@@ -165,6 +203,42 @@ function Bubble({ role, children }: { role: string; children: React.ReactNode })
       >
         {children}
       </div>
+    </div>
+  );
+}
+
+function DealCard({ code, pct, name, finalPrice }: { code: string | null; pct: number; name: string; finalPrice: number }) {
+  if (!code || pct <= 0) {
+    return (
+      <div className="mt-2 rounded-xl border border-border bg-background/60 p-3 text-xs text-muted-foreground">
+        {name} is already at its best price today.
+      </div>
+    );
+  }
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success(`Copied ${code}`);
+    } catch {
+      toast.error("Could not copy");
+    }
+  };
+  return (
+    <div className="mt-2 rounded-xl border border-primary/40 bg-gradient-warm/10 p-3">
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-primary">
+        <BadgePercent className="h-3.5 w-3.5" /> Deal unlocked
+      </div>
+      <div className="mt-1 text-sm font-medium leading-tight">{name}</div>
+      <div className="mt-1 text-xs text-muted-foreground">
+        {pct}% off · Your price {inr(finalPrice)}
+      </div>
+      <button
+        onClick={copy}
+        className="mt-2 inline-flex items-center gap-2 h-8 px-3 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:brightness-110"
+      >
+        <Copy className="h-3 w-3" /> {code}
+      </button>
+      <div className="mt-1 text-[10px] text-muted-foreground">Apply at cart · valid for this session</div>
     </div>
   );
 }

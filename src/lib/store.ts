@@ -13,6 +13,7 @@ interface ShopState {
   wishlist: string[];
   recentlyViewed: string[];
   compare: string[];
+  aiCoupons: Record<string, number>; // code -> discount (0..1)
   addToCart: (id: string, opts?: { color?: string; size?: string; qty?: number }) => void;
   removeFromCart: (id: string) => void;
   setQty: (id: string, qty: number) => void;
@@ -21,6 +22,7 @@ interface ShopState {
   addRecentlyViewed: (id: string) => void;
   toggleCompare: (id: string) => void;
   clearCompare: () => void;
+  addAiCoupon: (code: string, pct: number) => void;
 }
 
 export const useShop = create<ShopState>()(
@@ -30,6 +32,7 @@ export const useShop = create<ShopState>()(
       wishlist: [],
       recentlyViewed: [],
       compare: [],
+      aiCoupons: {},
       addToCart: (id, opts) => {
         const existing = get().cart.find((c) => c.id === id);
         if (existing) {
@@ -56,6 +59,8 @@ export const useShop = create<ShopState>()(
         else if (get().compare.length < 4) set({ compare: [...get().compare, id] });
       },
       clearCompare: () => set({ compare: [] }),
+      addAiCoupon: (code, pct) =>
+        set({ aiCoupons: { ...get().aiCoupons, [code.toUpperCase()]: Math.max(0, Math.min(0.25, pct)) } }),
     }),
     { name: "lumen-shop" },
   ),
