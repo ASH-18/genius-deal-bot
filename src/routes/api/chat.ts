@@ -10,15 +10,20 @@ const MAX_CHARS_PER_MESSAGE = 2000;
 const MAX_TOTAL_CHARS = 20_000;
 const RECENT_TURNS = 20; // trim history server-side before forwarding
 
-const textPartSchema = z.object({
-  type: z.literal("text"),
-  text: z.string().max(MAX_CHARS_PER_MESSAGE),
-});
+// Allow any AI SDK UIMessage part (text, tool-*, reasoning, etc.).
+// We still cap text length hard; non-text parts are passed through
+// so multi-turn tool conversations don't get rejected as "Invalid request".
+const partSchema = z
+  .object({
+    type: z.string().max(64),
+    text: z.string().max(MAX_CHARS_PER_MESSAGE).optional(),
+  })
+  .passthrough();
 
 const messageSchema = z.object({
   id: z.string().max(128).optional(),
   role: z.enum(["system", "user", "assistant"]),
-  parts: z.array(textPartSchema).min(1).max(8),
+  parts: z.array(partSchema).min(1).max(32),
 });
 
 const bodySchema = z.object({
@@ -125,7 +130,9 @@ export const Route = createFileRoute("/api/chat")({
 
         const messages = parsed.data.messages;
         const totalChars = messages.reduce(
-          (sum, m) => sum + m.parts.reduce((s, p) => s + p.text.length, 0),
+          (sum, m) =>
+            sum +
+            m.parts.reduce((s, p) => s + (typeof p.text === "string" ? p.text.length : 0), 0),
           0,
         );
         if (totalChars > MAX_TOTAL_CHARS) {
