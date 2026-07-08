@@ -214,6 +214,15 @@ function Bubble({ role, children }: { role: string; children: React.ReactNode })
   );
 }
 
+function friendlyError(error: Error | unknown): string {
+  const msg = error instanceof Error ? error.message : "";
+  const is403 = msg.includes("403") || msg.toLowerCase().includes("forbidden");
+  if (is403) {
+    return "We couldn't verify your request. Please refresh the page and try again.";
+  }
+  return msg || "Something went wrong.";
+}
+
 function DealCard({ code, pct, name, finalPrice }: { code: string | null; pct: number; name: string; finalPrice: number }) {
   if (!code || pct <= 0) {
     return (
