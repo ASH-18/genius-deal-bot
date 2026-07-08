@@ -30,19 +30,35 @@ const bodySchema = z.object({
   messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
 });
 
-// Same-origin check: block cross-site callers from burning AI credits.
-// The app's own fetches send an Origin header equal to the request URL's origin.
+// CSRF-style guard: block cross-site callers from burning AI credits.
+// Accept requests whose Origin/Referer hostname matches the request host, or
+// is a Lovable preview/published host, or localhost during dev. If neither
+// Origin nor Referer is present (some server-to-server calls), allow it —
+// browsers always attach one of them for fetch/XHR from a page.
+const ALLOWED_HOST_SUFFIXES = [
+  ".lovableproject.com",
+  ".lovable.app",
+  ".lovable.dev",
+];
+
+function hostAllowed(hostname: string, requestHost: string | null): boolean {
+  if (requestHost && hostname === requestHost.split(":")[0]) return true;
+  if (hostname === "localhost" || hostname === "127.0.0.1") return true;
+  return ALLOWED_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix));
+}
+
 function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
   const host = request.headers.get("host");
-  if (!host) return false;
-  const expected = new Set<string>([`https://${host}`, `http://${host}`]);
-  if (origin && expected.has(origin)) return true;
-  if (referer) {
+  if (!origin && !referer) return true; // no browser context to compare
+  const candidates: string[] = [];
+  if (origin) candidates.push(origin);
+  if (referer) candidates.push(referer);
+  for (const c of candidates) {
     try {
-      const refOrigin = new URL(referer).origin;
-      if (expected.has(refOrigin)) return true;
+      const url = new URL(c);
+      if (hostAllowed(url.hostname, host)) return true;
     } catch {
       /* ignore */
     }
