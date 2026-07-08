@@ -142,8 +142,15 @@ export function AIAssistant({ open, onClose }: { open: boolean; onClose: () => v
               )}
 
               {error && (
-                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-                  {error.message || "Something went wrong."}
+                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-3 space-y-1">
+                  <p>{friendlyError(error)}</p>
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="text-xs underline underline-offset-2 hover:text-destructive/80"
+                  >
+                    Refresh page
+                  </button>
                 </div>
               )}
             </div>
