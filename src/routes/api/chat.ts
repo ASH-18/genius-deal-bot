@@ -2,8 +2,48 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { PRODUCTS } from "@/lib/products";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { z } from "zod";
 
-type ChatBody = { messages?: unknown };
+// Hard caps to prevent token/cost abuse via oversized payloads.
+const MAX_MESSAGES = 40;
+const MAX_CHARS_PER_MESSAGE = 2000;
+const MAX_TOTAL_CHARS = 20_000;
+const RECENT_TURNS = 20; // trim history server-side before forwarding
+
+const textPartSchema = z.object({
+  type: z.literal("text"),
+  text: z.string().max(MAX_CHARS_PER_MESSAGE),
+});
+
+const messageSchema = z.object({
+  id: z.string().max(128).optional(),
+  role: z.enum(["system", "user", "assistant"]),
+  parts: z.array(textPartSchema).min(1).max(8),
+});
+
+const bodySchema = z.object({
+  messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
+});
+
+// Same-origin check: block cross-site callers from burning AI credits.
+// The app's own fetches send an Origin header equal to the request URL's origin.
+function isSameOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  const referer = request.headers.get("referer");
+  const host = request.headers.get("host");
+  if (!host) return false;
+  const expected = new Set<string>([`https://${host}`, `http://${host}`]);
+  if (origin && expected.has(origin)) return true;
+  if (referer) {
+    try {
+      const refOrigin = new URL(referer).origin;
+      if (expected.has(refOrigin)) return true;
+    } catch {
+      /* ignore */
+    }
+  }
+  return false;
+}
 
 // Compact catalog string given to the model as grounding context.
 function catalogContext() {
@@ -36,8 +76,33 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { messages } = (await request.json()) as ChatBody;
-        if (!Array.isArray(messages)) return new Response("messages required", { status: 400 });
+        if (!isSameOrigin(request)) {
+          return new Response("Forbidden", { status: 403 });
+        }
+
+        let raw: unknown;
+        try {
+          raw = await request.json();
+        } catch {
+          return new Response("Invalid JSON", { status: 400 });
+        }
+
+        const parsed = bodySchema.safeParse(raw);
+        if (!parsed.success) {
+          return new Response("Invalid request", { status: 400 });
+        }
+
+        const messages = parsed.data.messages;
+        const totalChars = messages.reduce(
+          (sum, m) => sum + m.parts.reduce((s, p) => s + p.text.length, 0),
+          0,
+        );
+        if (totalChars > MAX_TOTAL_CHARS) {
+          return new Response("Payload too large", { status: 413 });
+        }
+
+        // Trim conversation history to the most recent turns before forwarding.
+        const trimmed = messages.slice(-RECENT_TURNS);
 
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
@@ -46,10 +111,12 @@ export const Route = createFileRoute("/api/chat")({
         const result = streamText({
           model: gateway("google/gemini-3-flash-preview"),
           system: SYSTEM,
-          messages: await convertToModelMessages(messages as UIMessage[]),
+          messages: await convertToModelMessages(trimmed as unknown as UIMessage[]),
         });
 
-        return result.toUIMessageStreamResponse({ originalMessages: messages as UIMessage[] });
+        return result.toUIMessageStreamResponse({
+          originalMessages: trimmed as unknown as UIMessage[],
+        });
       },
     },
   },
