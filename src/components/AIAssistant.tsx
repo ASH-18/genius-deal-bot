@@ -142,8 +142,15 @@ export function AIAssistant({ open, onClose }: { open: boolean; onClose: () => v
               )}
 
               {error && (
-                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-                  {error.message || "Something went wrong."}
+                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-3 space-y-1">
+                  <p>{friendlyError(error)}</p>
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="text-xs underline underline-offset-2 hover:text-destructive/80"
+                  >
+                    Refresh page
+                  </button>
                 </div>
               )}
             </div>
@@ -205,6 +212,15 @@ function Bubble({ role, children }: { role: string; children: React.ReactNode })
       </div>
     </div>
   );
+}
+
+function friendlyError(error: Error | unknown): string {
+  const msg = error instanceof Error ? error.message : "";
+  const is403 = msg.includes("403") || msg.toLowerCase().includes("forbidden");
+  if (is403) {
+    return "We couldn't verify your request. Please refresh the page and try again.";
+  }
+  return msg || "Something went wrong.";
 }
 
 function DealCard({ code, pct, name, finalPrice }: { code: string | null; pct: number; name: string; finalPrice: number }) {
